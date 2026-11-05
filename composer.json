@@ -1,0 +1,74 @@
+{
+    "name": "laraxot/module_warehouse_fila5",
+    "description": "Generic mapped warehouse module for the Laraxot ecosystem: warehouses, areas, locations, tracked stock units, immutable stock movements and pluggable placement guards.",
+    "keywords": [
+        "laraxot",
+        "laravel",
+        "filament",
+        "module_warehouse",
+        "warehouse",
+        "stock",
+        "inventory"
+    ],
+    "homepage": "https://github.com/laraxot/module_warehouse_fila5",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marco Sottana",
+            "email": "marco.sottana@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Warehouse\\Providers\\WarehouseServiceProvider",
+                "Modules\\Warehouse\\Providers\\Filament\\AdminPanelProvider"
+            ],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Warehouse\\": "app/",
+            "Modules\\Warehouse\\Database\\Factories\\": "database/factories/",
+            "Modules\\Warehouse\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Warehouse\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.3"
+    },
+    "require-dev": {},
+    "repositories_comment": [
+        {
+            "type": "path",
+            "url": "../Xot"
+        },
+        {
+            "type": "path",
+            "url": "../Labeling"
+        }
+    ],
+    "scripts": {
+        "post-autoload-dump": [],
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "./vendor/bin/pest --no-coverage",
+        "lint": [
+            "@php vendor/bin/pint",
+            "@php vendor/bin/phpstan analyse"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "wikimedia/composer-merge-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
