@@ -17,6 +17,13 @@ use Modules\Xot\Actions\Cast\SafeStringCastAction;
  *
  * Se l'unità occupa già una posizione della stessa area/posizione il suo peso è già nel carico
  * attuale e non viene contato due volte (spostamento interno all'area).
+<<<<<<< HEAD
+=======
+ *
+ * I carichi si leggono con lock condiviso (ultima versione confermata, non lo snapshot della
+ * transazione): dentro PutAwayStockUnitAction area e posizione sono già bloccate, quindi il
+ * controllo e la scrittura del movimento sono atomici rispetto agli altri posizionamenti.
+>>>>>>> laraxot/dev
  */
 class CapacityPlacementGuard implements PlacementGuardContract
 {
@@ -32,7 +39,11 @@ class CapacityPlacementGuard implements PlacementGuardContract
 
         $locationCheck = new CapacityCheckData(
             maxKg: $location->maxWeightKg(),
+<<<<<<< HEAD
             loadKg: $this->getLocationLoad->execute($location),
+=======
+            loadKg: $this->getLocationLoad->execute($location, lockingRead: true),
+>>>>>>> laraxot/dev
             incomingKg: $unitKg,
             alreadyIncludedKg: $current !== null && $current->id === $location->id ? $unitKg : 0.0,
         );
@@ -49,7 +60,11 @@ class CapacityPlacementGuard implements PlacementGuardContract
         $area = $location->area;
         $areaCheck = new CapacityCheckData(
             maxKg: $area->maxWeightKg(),
+<<<<<<< HEAD
             loadKg: $this->getAreaLoad->execute($area),
+=======
+            loadKg: $this->getAreaLoad->execute($area, lockingRead: true),
+>>>>>>> laraxot/dev
             incomingKg: $unitKg,
             alreadyIncludedKg: $current !== null && $current->area_id === $area->id ? $unitKg : 0.0,
         );

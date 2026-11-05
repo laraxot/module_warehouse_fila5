@@ -19,6 +19,15 @@ use Webmozart\Assert\Assert;
  *
  * Verifica i guard di posizionamento (CheckPlacementAction): un rifiuto lancia
  * PlacementDeniedException con il motivo del guard. Lo stato diventa `stored`.
+<<<<<<< HEAD
+=======
+ *
+ * Concorrenza: nella stessa transazione blocca prima area e posizione di destinazione
+ * (LockPlacementTargetAction), poi l'unità (LockStockUnitAction), e solo dopo esegue i guard.
+ * Due posizionamenti paralleli verso la stessa area/posizione si serializzano: il secondo legge
+ * il carico dopo il commit del primo e non supera la portata. I guard ricevono la posizione
+ * bloccata (con `area` bloccata già caricata) e girano dentro la transazione `warehouse`.
+>>>>>>> laraxot/dev
  */
 class PutAwayStockUnitAction
 {
@@ -28,11 +37,20 @@ class PutAwayStockUnitAction
         private readonly CheckPlacementAction $checkPlacement,
         private readonly RecordStockMovementAction $recordMovement,
         private readonly LockStockUnitAction $lockStockUnit,
+<<<<<<< HEAD
+=======
+        private readonly LockPlacementTargetAction $lockPlacementTarget,
+>>>>>>> laraxot/dev
     ) {}
 
     public function execute(StockUnit $unit, Location $location, ?Model $reference = null): StockUnit
     {
         return $unit->getConnection()->transaction(function () use ($unit, $location, $reference): StockUnit {
+<<<<<<< HEAD
+=======
+            // Ordine fisso dei lock: area → posizione → unità (vedi LockPlacementTargetAction).
+            $location = $this->lockPlacementTarget->execute($location);
+>>>>>>> laraxot/dev
             $locked = $this->lockStockUnit->execute($unit);
 
             Assert::true(
