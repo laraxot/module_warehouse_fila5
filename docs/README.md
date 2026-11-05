@@ -42,6 +42,15 @@ GetLocationLoadKgAction::execute(Location $location): float
 ```
 
 Di supporto: `GenerateStockUnitCodeAction` (codice con `lockForUpdate`), `LockStockUnitAction`,
+<<<<<<< HEAD
+=======
+GetAreaLoadKgAction::execute(Area $area, bool $lockingRead = false): float
+GetLocationLoadKgAction::execute(Location $location, bool $lockingRead = false): float
+LockPlacementTargetAction::execute(Location $location): Location
+```
+
+Di supporto: `GenerateStockUnitCodeAction` (codice con `lockForUpdate`), `LockStockUnitAction`, `SumNetWeightKgAction`,
+>>>>>>> laraxot/dev
 `GetAreaOccupancyAction`, `BuildWarehouseMapAction`, `ListAreaStockUnitsAction`, `ParseMapGeometryAction`.
 
 Le action modificano anche l'istanza passata (peso, posizione, stato): chi chiama vede subito lo stato aggiornato.
@@ -63,6 +72,30 @@ anno su tutti i magazzini**. Il generatore blocca la riga del magazzino e l'ulti
 | `adjustment` | differenza con segno | prima + differenza | peso netto = nuovo peso |
 | `shipment`, `void` | peso attuale | 0 | nessuna posizione (il peso netto resta quello spedito/annullato) |
 
+<<<<<<< HEAD
+=======
+### Concorrenza: capacità e lock
+
+Il controllo di portata è un *check-then-act*: senza lock due posizionamenti paralleli verso la stessa
+posizione o area leggono lo stesso carico e passano entrambi (audit database R4).
+`PutAwayStockUnitAction` lavora in una transazione sulla connessione `warehouse` e blocca, in quest'ordine:
+
+1. l'**area** di destinazione (`SELECT ... FOR UPDATE`, `LockPlacementTargetAction`);
+2. la **posizione** di destinazione (idem; la posizione restituita ha l'area bloccata come relazione);
+3. l'**unità** (`LockStockUnitAction`);
+
+e solo dopo esegue i guard. I carichi letti dai guard usano una lettura con lock condiviso
+(`GetLocationLoadKgAction`/`GetAreaLoadKgAction` con `lockingRead: true`, `SumNetWeightKgAction`): in
+MySQL con REPEATABLE READ una `SELECT SUM` normale leggerebbe lo snapshot iniziale della transazione e
+non vedrebbe l'unità appena stoccata da un'altra sessione.
+
+L'ordine area → posizione → unità è lo stesso ovunque: le action che bloccano solo l'unità (rettifica,
+annullo, consumo, uscita) prendono solo l'ultimo anello, quindi non si creano cicli. Un guard di un altro
+modulo che blocca righe proprie lo fa dentro `deny()`, cioè **dopo** i lock di Warehouse.
+`CheckPlacementAction` chiamata da sola (fuori da `PutAwayStockUnitAction`) non blocca nulla: serve a
+mostrare in anticipo il motivo di un rifiuto, ma l'esito vincolante è quello dentro la transazione.
+
+>>>>>>> laraxot/dev
 ### Stati
 
 `StockUnitStatusEnum::canTransitionTo()` definisce le transizioni; le action fanno
@@ -108,6 +141,14 @@ public function boot(): void
 }
 ```
 
+<<<<<<< HEAD
+=======
+Dentro `PutAwayStockUnitAction` il guard gira nella transazione `warehouse`, dopo i lock di area,
+posizione e unità (vedi *Concorrenza*): `$location` è la riga bloccata con `area` già caricata. Un
+guard che somma giacenze deve usare letture bloccanti; se blocca righe di un altro modulo (es. il
+titolo autorizzativo in Waste) lo fa dentro `deny()` e sempre nello stesso ordine.
+
+>>>>>>> laraxot/dev
 Il ServiceProvider di Warehouse unisce la propria config in `register()`, quindi il `push` nel `boot()`
 di un altro modulo trova sempre il default del modulo. I guard sono risolti dal container (dipendenze
 nel costruttore) e vengono chiamati anche per unità non ancora salvate: non contare su `$unit->exists`.
@@ -139,3 +180,10 @@ e alcune unità create con `CreateStockUnitAction`.
 `tests/Unit`: guard di capacità (carichi simulati), generatore di codice, enum.
 `tests/Feature`: creazione, putaway/transfer, consumo, spedizione, rettifica, annullamento con
 verifica dei movimenti, immutabilità del registro, guard registrato da config.
+<<<<<<< HEAD
+=======
+verifica dei movimenti, immutabilità del registro, guard registrato da config, ordine dei lock
+e portata (`PlacementLockingTest`).
+
+Storie: [`docs/stories/`](stories/).
+>>>>>>> laraxot/dev

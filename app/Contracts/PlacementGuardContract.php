@@ -16,6 +16,19 @@ use Modules\Warehouse\Models\StockUnit;
  *
  * Un guard viene chiamato anche per unità non ancora salvate (creazione con posizione):
  * non deve dare per scontato `$unit->exists`.
+<<<<<<< HEAD
+=======
+ *
+ * Concorrenza: dentro PutAwayStockUnitAction i guard girano nella transazione della connessione
+ * `warehouse`, dopo il lock (FOR UPDATE) dell'area e della posizione di destinazione e dell'unità
+ * (LockPlacementTargetAction, ordine area → posizione → unità). `$location` è la riga bloccata, con
+ * la relazione `area` bloccata già caricata. Un guard che legge carichi deve usare letture bloccanti
+ * (es. GetAreaLoadKgAction con `lockingRead: true`); se blocca righe proprie (anche su altre
+ * connessioni) lo fa qui dentro, sempre dopo i lock di Warehouse e sempre nello stesso ordine.
+ * Lo stesso guard può essere chiamato anche fuori transazione (controllo preventivo per un
+ * messaggio all'operatore, es. CheckPlacementAction da Roosko): l'esito vincolante è quello
+ * dentro PutAwayStockUnitAction.
+>>>>>>> laraxot/dev
  */
 interface PlacementGuardContract
 {
