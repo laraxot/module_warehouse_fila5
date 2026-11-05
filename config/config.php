@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Modules\Warehouse\Guards\CapacityPlacementGuard;
 
 return [
+    'navigation_sort' => 2,
     'name' => 'Warehouse',
     'description' => 'Magazzino mappato: aree, posizioni, unità di stoccaggio e movimenti',
     'icon' => 'heroicon-o-building-storefront',
