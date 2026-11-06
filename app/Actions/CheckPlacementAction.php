@@ -45,7 +45,12 @@ class CheckPlacementAction
                 throw InvalidPlacementGuardException::forEntry($entry);
             }
 
-            $guards[] = app($entry);
+            $guard = app($entry);
+            if (! $guard instanceof PlacementGuardContract) {
+                throw InvalidPlacementGuardException::forEntry($entry);
+            }
+
+            $guards[] = $guard;
         }
 
         return $guards;

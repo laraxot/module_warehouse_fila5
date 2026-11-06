@@ -22,9 +22,15 @@ uses(TestCase::class);
 function capacityGuard(float $locationLoadKg, float $areaLoadKg): CapacityPlacementGuard
 {
     $locationLoad = Mockery::mock(GetLocationLoadKgAction::class);
+    if (! $locationLoad instanceof GetLocationLoadKgAction) {
+        throw new LogicException('Location load test double must be a GetLocationLoadKgAction.');
+    }
     $locationLoad->shouldReceive('execute')->andReturn($locationLoadKg);
 
     $areaLoad = Mockery::mock(GetAreaLoadKgAction::class);
+    if (! $areaLoad instanceof GetAreaLoadKgAction) {
+        throw new LogicException('Area load test double must be a GetAreaLoadKgAction.');
+    }
     $areaLoad->shouldReceive('execute')->andReturn($areaLoadKg);
 
     return new CapacityPlacementGuard($locationLoad, $areaLoad);

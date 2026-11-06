@@ -63,7 +63,12 @@ function createUnit(Warehouse $warehouse, float $kg, ?Location $location = null,
  */
 function movementTypes(StockUnit $unit): array
 {
-    return $unit->movements()->get()->map(static fn (StockMovement $m): MovementTypeEnum => $m->type)->values()->all();
+    $types = [];
+    foreach ($unit->movements()->get() as $movement) {
+        $types[] = $movement->type;
+    }
+
+    return $types;
 }
 
 describe('create', function (): void {
@@ -153,8 +158,7 @@ describe('putaway and transfer', function (): void {
         Assert::assertSame(StockUnitStatusEnum::STORED, $unit->status);
         Assert::assertSame([MovementTypeEnum::RECEIPT, MovementTypeEnum::PUTAWAY, MovementTypeEnum::TRANSFER], movementTypes($unit));
 
-        $transfer = $unit->movements()->get()->last();
-        Assert::assertInstanceOf(StockMovement::class, $transfer);
+        $transfer = $unit->movements()->orderByDesc('id')->firstOrFail();
         Assert::assertSame($a->id, $transfer->from_location_id);
         Assert::assertSame($b->id, $transfer->to_location_id);
         Assert::assertSame(600.0, (float) $transfer->weight_after_kg);
