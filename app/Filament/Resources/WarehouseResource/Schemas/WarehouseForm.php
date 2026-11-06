@@ -41,6 +41,7 @@ class WarehouseForm extends XotBaseResourceForm
             'map' => SpatieMediaLibraryFileUpload::make('map')
                 ->collection(Warehouse::MAP_COLLECTION)
                 ->image()
+                ->acceptedFileTypes(Warehouse::MAP_MIME_TYPES)
                 ->columnSpanFull(),
             'is_active' => Toggle::make('is_active')
                 ->default(true),

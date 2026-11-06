@@ -16,6 +16,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Validation\Rules\Unique;
 use Modules\Warehouse\Actions\ParseMapGeometryAction;
 use Modules\Warehouse\Enums\AreaTypeEnum;
+use Modules\Warehouse\Models\Area;
 use Modules\Xot\Filament\Resources\Schemas\XotBaseResourceForm;
 
 use Modules\Xot\Actions\Cast\SafeIntCastAction;
@@ -54,7 +55,9 @@ class AreaForm extends XotBaseResourceForm
                 ->numeric()
                 ->minValue(0)
                 ->step(0.001),
-            'color' => ColorPicker::make('color'),
+            'color' => ColorPicker::make('color')
+                ->hex()
+                ->regex(Area::COLOR_PATTERN),
             'map_geometry' => Textarea::make('map_geometry')
                 ->rows(4)
                 ->columnSpanFull()

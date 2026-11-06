@@ -87,7 +87,7 @@ class BuildWarehouseMapAction
                 name: $area->name,
                 type: $area->type,
                 polygon: $polygon,
-                color: $area->color,
+                color: $area->safeColor(),
                 occupancy: $this->getAreaOccupancy->execute($area),
                 unitsCount: $areaUnitCounts[$area->id] ?? 0,
             );

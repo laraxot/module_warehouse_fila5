@@ -23,6 +23,9 @@ return [
         'same_location' => 'L\'unità :code è già nella posizione :location.',
         'code_already_used' => 'Il codice posizione :location è già usato in questo magazzino.',
     ],
+    'area' => [
+        'invalid_color' => 'Colore non valido ":color": usa il formato esadecimale #rrggbb.',
+    ],
     'geometry' => [
         'invalid' => 'Poligono non valido: usa un elenco JSON di vertici [x,y] in metri.',
         'too_few_vertices' => 'Il poligono deve avere almeno :min vertici.',
