@@ -14,6 +14,7 @@ use Modules\Xot\Filament\Widgets\XotBaseStatsOverviewWidget;
 /**
  * Occupazione delle aree attive: carico / portata e percentuale, colore per fascia.
  * Sulla mappa riceve il magazzino selezionato (`warehouseId`); in dashboard mostra tutte le aree.
+ * Una query sola per tutte le aree (`withLoadKg()`), anche con il polling.
  */
 class AreaOccupancyWidget extends XotBaseStatsOverviewWidget
 {
@@ -34,7 +35,7 @@ class AreaOccupancyWidget extends XotBaseStatsOverviewWidget
     {
         $occupancy = app(GetAreaOccupancyAction::class);
 
-        $query = Area::query()->with('warehouse')->where('is_active', true);
+        $query = Area::query()->with('warehouse')->withLoadKg()->where('is_active', true);
         if ($this->warehouseId !== null) {
             $query->where('warehouse_id', $this->warehouseId);
         }

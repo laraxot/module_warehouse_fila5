@@ -10,10 +10,13 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Schemas\Components\Component;
 use Filament\Tables\Columns\Column;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Modules\Labeling\Filament\Actions\PrintLabelTableAction;
 use Modules\Warehouse\Filament\Resources\LocationResource\Schemas\LocationForm;
 use Modules\Warehouse\Filament\Resources\LocationResource\Tables\LocationsTable;
+use Modules\Warehouse\Models\Location;
 use Modules\Xot\Filament\Resources\RelationManagers\XotBaseRelationManager;
 
 /**
@@ -35,6 +38,15 @@ class LocationsRelationManager extends XotBaseRelationManager
         $schema = Arr::except(app(LocationForm::class)->getFormSchema(), ['area_id']);
 
         return $schema;
+    }
+
+    /**
+     * Carico per riga in un'unica query (`withLoadKg()`) invece di una SUM per riga.
+     */
+    #[\Override]
+    public function table(Table $table): Table
+    {
+        return parent::table($table)->modifyQueryUsing(static fn (Builder $query): Builder => Location::applyLoadKg($query));
     }
 
     /**

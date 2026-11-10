@@ -90,6 +90,13 @@ modulo che blocca righe proprie lo fa dentro `deny()`, cioè **dopo** i lock di 
 `CheckPlacementAction` chiamata da sola (fuori da `PutAwayStockUnitAction`) non blocca nulla: serve a
 mostrare in anticipo il motivo di un rifiuto, ma l'esito vincolante è quello dentro la transazione.
 
+### Carichi nelle liste (niente query per riga)
+
+`Area::withLoadKg()` e `Location::withLoadKg()` aggiungono la colonna `load_kg` alla query; le action di carico
+la usano se presente. Tabelle e relation manager di aree e posizioni, `AreaOccupancyWidget` e la mappa
+eseguono un numero fisso di query (audit database R13). Indice `stock_units (warehouse_id, status, location_id)`
+(migrazione `2026_11_06_100500_add_query_supporting_indexes`, `ensureIndexes()`).
+
 ### Stati
 
 `StockUnitStatusEnum::canTransitionTo()` definisce le transizioni; le action fanno

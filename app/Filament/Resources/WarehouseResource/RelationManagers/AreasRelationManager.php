@@ -10,9 +10,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Schemas\Components\Component;
 use Filament\Tables\Columns\Column;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Modules\Warehouse\Filament\Resources\AreaResource\Schemas\AreaForm;
 use Modules\Warehouse\Filament\Resources\AreaResource\Tables\AreasTable;
+use Modules\Warehouse\Models\Area;
 use Modules\Xot\Filament\Resources\RelationManagers\XotBaseRelationManager;
 
 /**
@@ -34,6 +37,15 @@ class AreasRelationManager extends XotBaseRelationManager
         $schema = Arr::except(app(AreaForm::class)->getFormSchema(), ['warehouse_id']);
 
         return $schema;
+    }
+
+    /**
+     * Carico per riga in un'unica query (`withLoadKg()`) invece di una SUM per riga.
+     */
+    #[\Override]
+    public function table(Table $table): Table
+    {
+        return parent::table($table)->modifyQueryUsing(static fn (Builder $query): Builder => Area::applyLoadKg($query));
     }
 
     /**
