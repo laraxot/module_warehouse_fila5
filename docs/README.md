@@ -189,3 +189,18 @@ Le migrazioni di `stock_units`, `stock_movements` hanno un `down()` che rifiuta 
 cancellano con `migrate:rollback` (audit database R15). Unique e soft delete: decisioni nella story
 [`legal-tables-migrations`](../../Waste/docs/stories/legal-tables-migrations.story.md) del modulo Waste.
 
+## Permessi
+
+Policy in `app/Models/Policies`, tutte con `DeniesUndeclaredFilamentAbilities` (eliminazione massiva, ripristino,
+riordino, collegamenti negati se non dichiarati). Permessi creati da `WarehousePermissionSeeder` (idempotente,
+guard `web`, chiamato da `WarehouseDatabaseSeeder`).
+
+| Bottone / pagina | Abilità | Permesso |
+|---|---|---|
+| Stocca/sposta unità | `move` | `stock_unit.move` |
+| Rettifica peso | `adjustWeight` | `stock_unit.adjustWeight` |
+| Annulla unità | `void` | `stock_unit.void` |
+| Mappa del magazzino (`canAccess`) | `viewAny` Warehouse | `warehouse.viewAny` |
+| Widget occupazione (`canView`) | `viewAny` Area | `area.viewAny` |
+
+I bottoni usano `->authorize()` e ricontrollano con `Gate::authorize()` nella callback.

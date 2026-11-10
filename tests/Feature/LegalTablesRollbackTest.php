@@ -23,7 +23,13 @@ test('rollback of a legal data table is refused and the table stays', function (
         Assert::assertStringContainsString('Rollback', $e->getMessage());
     }
 
-    Assert::assertTrue($migration->getConn()->hasTable($migration->getTable()));
+    $schema = $migration->getConn();
+    $table = $migration->getTable();
+    if (! $schema instanceof Illuminate\Database\Schema\Builder || ! \is_string($table)) {
+        throw new LogicException('Migrazione inattesa: '.$file);
+    }
+
+    Assert::assertTrue($schema->hasTable($table));
 })->with([
     '2026_11_04_100300_create_stock_units_table.php',
     '2026_11_04_100400_create_stock_movements_table.php',

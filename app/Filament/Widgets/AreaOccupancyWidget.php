@@ -6,6 +6,7 @@ namespace Modules\Warehouse\Filament\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Number;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Reactive;
 use Modules\Warehouse\Actions\GetAreaOccupancyAction;
 use Modules\Warehouse\Models\Area;
@@ -22,6 +23,12 @@ class AreaOccupancyWidget extends XotBaseStatsOverviewWidget
     public ?int $warehouseId = null;
 
     protected ?string $pollingInterval = '60s';
+
+    /** Solo chi può vedere le aree (permesso `area.viewAny`). */
+    public static function canView(): bool
+    {
+        return Gate::allows('viewAny', Area::class);
+    }
 
     protected function getHeading(): ?string
     {

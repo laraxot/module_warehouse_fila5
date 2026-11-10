@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Warehouse\Filament\Pages;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Gate;
 use Modules\Warehouse\Actions\BuildWarehouseMapAction;
 use Modules\Warehouse\Actions\ListAreaStockUnitsAction;
 use Modules\Warehouse\Datas\WarehouseMapData;
@@ -25,6 +26,12 @@ use Modules\Xot\Filament\Pages\XotBasePage;
  */
 class WarehouseMapPage extends XotBasePage
 {
+    /** Solo chi può vedere i magazzini (permesso `warehouse.viewAny`). */
+    public static function canAccess(): bool
+    {
+        return Gate::allows('viewAny', Warehouse::class);
+    }
+
     public ?int $warehouseId = null;
 
     public ?int $selectedAreaId = null;

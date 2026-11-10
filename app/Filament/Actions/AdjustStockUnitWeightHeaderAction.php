@@ -7,6 +7,7 @@ namespace Modules\Warehouse\Filament\Actions;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Modules\Warehouse\Actions\AdjustStockUnitWeightAction;
 use Modules\Warehouse\Exceptions\WarehouseException;
@@ -18,6 +19,8 @@ use Modules\Xot\Filament\Actions\XotBaseAction;
 
 /**
  * Rettifica il peso netto dell'unità con motivo obbligatorio (AdjustStockUnitWeightAction).
+ *
+ * Richiede l'abilità `adjustWeight` della StockUnitPolicy (permesso `stock_unit.adjustWeight`).
  *
  * Etichetta/icona: `stock_unit.actions.adjust_weight`; testi del modale: `adjust_stock_unit_weight_header.php`.
  */
@@ -36,6 +39,7 @@ class AdjustStockUnitWeightHeaderAction extends XotBaseAction
 
         $this->icon('heroicon-o-scale')
             ->color('warning')
+            ->authorize('adjustWeight')
             ->modalHeading(static fn (StockUnit $record): string => static::transAction('modal_heading', ['code' => $record->code]))
             ->modalDescription(static fn (StockUnit $record): string => static::transAction('modal_description', ['kg' => $record->netWeightKg()]))
             ->fillForm(static fn (StockUnit $record): array => ['new_net_weight_kg' => $record->netWeightKg()])
@@ -51,6 +55,8 @@ class AdjustStockUnitWeightHeaderAction extends XotBaseAction
                     ->rows(3),
             ])
             ->action(function (array $data, StockUnit $record): void {
+                Gate::authorize('adjustWeight', $record);
+
                 try {
                     app(AdjustStockUnitWeightAction::class)->execute(
                         $record,

@@ -6,6 +6,7 @@ namespace Modules\Warehouse\Filament\Actions;
 
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Modules\Warehouse\Actions\VoidStockUnitAction;
 use Modules\Warehouse\Enums\StockUnitStatusEnum;
@@ -17,6 +18,8 @@ use Modules\Xot\Filament\Actions\XotBaseAction;
 
 /**
  * Annulla l'unità con motivo obbligatorio (VoidStockUnitAction). Operazione irreversibile.
+ *
+ * Richiede l'abilità `void` della StockUnitPolicy (permesso `stock_unit.void`).
  *
  * Etichetta/icona: `stock_unit.actions.void`; testi del modale: `void_stock_unit_header.php`.
  */
@@ -35,6 +38,7 @@ class VoidStockUnitHeaderAction extends XotBaseAction
 
         $this->icon('heroicon-o-no-symbol')
             ->color('danger')
+            ->authorize('void')
             ->requiresConfirmation()
             ->modalHeading(static fn (StockUnit $record): string => static::transAction('modal_heading', ['code' => $record->code]))
             ->modalDescription(static fn (): string => static::transAction('modal_description'))
@@ -45,6 +49,8 @@ class VoidStockUnitHeaderAction extends XotBaseAction
                     ->rows(3),
             ])
             ->action(function (array $data, StockUnit $record): void {
+                Gate::authorize('void', $record);
+
                 try {
                     app(VoidStockUnitAction::class)->execute($record, SafeStringCastAction::cast($data['reason'] ?? ''));
                 } catch (WarehouseException|InvalidArgumentException $e) {

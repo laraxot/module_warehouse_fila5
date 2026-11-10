@@ -6,6 +6,7 @@ namespace Modules\Warehouse\Filament\Actions;
 
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Modules\Warehouse\Actions\PutAwayStockUnitAction;
 use Modules\Warehouse\Enums\StockUnitStatusEnum;
@@ -20,6 +21,8 @@ use Modules\Xot\Filament\Actions\XotBaseAction;
 /**
  * Stocca o sposta l'unità in una posizione del suo magazzino (PutAwayStockUnitAction).
  * Un rifiuto dei guard di posizionamento resta nel modale con il motivo.
+ *
+ * Richiede l'abilità `move` della StockUnitPolicy (permesso `stock_unit.move`).
  *
  * Etichetta/icona: `stock_unit.actions.move`; testi del modale: `move_stock_unit_header.php`.
  */
@@ -38,6 +41,7 @@ class MoveStockUnitHeaderAction extends XotBaseAction
 
         $this->icon('heroicon-o-arrows-right-left')
             ->color('primary')
+            ->authorize('move')
             ->modalHeading(static fn (StockUnit $record): string => static::transAction('modal_heading', ['code' => $record->code]))
             ->modalDescription(static fn (): string => static::transAction('modal_description'))
             ->schema(fn (StockUnit $record): array => [
@@ -47,6 +51,8 @@ class MoveStockUnitHeaderAction extends XotBaseAction
                     ->required(),
             ])
             ->action(function (array $data, StockUnit $record): void {
+                Gate::authorize('move', $record);
+
                 $location = Location::query()->findOrFail(SafeIntCastAction::cast($data['location_id'] ?? null));
 
                 try {

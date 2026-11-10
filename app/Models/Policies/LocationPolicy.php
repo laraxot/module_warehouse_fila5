@@ -7,9 +7,12 @@ namespace Modules\Warehouse\Models\Policies;
 use Modules\User\Models\Policies\UserBasePolicy;
 use Modules\Warehouse\Models\Location;
 use Modules\Xot\Contracts\UserContract;
+use Modules\Xot\Models\Policies\Concerns\DeniesUndeclaredFilamentAbilities;
 
 class LocationPolicy extends UserBasePolicy
 {
+    use DeniesUndeclaredFilamentAbilities;
+
     public function viewAny(UserContract $user): bool
     {
         return $user->hasPermissionTo('location.viewAny');
