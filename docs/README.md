@@ -13,7 +13,7 @@ Dipendenze: `Xot`, `Labeling` (identificatori QR/RFID e stampa etichette). Conne
 |---|---|---|
 | `Warehouse` | `warehouses` | `code` univoco, `map_width_m`/`map_height_m`, media collection `map` (planimetria, file singolo, solo PNG/JPEG/WebP: niente SVG, che può contenere script) |
 | `Area` | `areas` | `type` (`AreaTypeEnum`), `max_weight_kg` (null = illimitata), `map_geometry` `[[x,y],...]` in metri, `color` solo `#rrggbb` (validato nel form e nel modello: finisce nell'attributo `style` della mappa), unique `(warehouse_id, code)` |
-| `Location` | `locations` | `code` univoco nel magazzino (`{area}-{codice}`, garantito dal modello), `x`/`y` in metri, `max_weight_kg`; implementa `LabelableContract` (codice etichetta `LOC-{magazzino}-{codice}`) |
+| `Location` | `warehouse_locations` | `code` univoco nel magazzino (`{area}-{codice}`, garantito dal modello), `x`/`y` in metri, `max_weight_kg`; implementa `LabelableContract` (codice etichetta `LOC-{magazzino}-{codice}`) |
 | `StockUnit` | `stock_units` | `code` `SU-{anno}-{6 cifre}`, `status` (`StockUnitStatusEnum`), `container_type`, `net_weight_kg`, `tare_weight_kg`, morph `subject`; implementa `LabelableContract` (codice etichetta = `code`) |
 | `StockMovement` | `stock_movements` | registro solo-insert: update/delete lanciano `ImmutableStockMovementException`; morph `reference` |
 

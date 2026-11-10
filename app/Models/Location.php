@@ -41,6 +41,9 @@ class Location extends BaseModel implements LabelableContract
 
     public const string LABEL_PREFIX = 'LOC';
 
+    /** Non `locations`: nome già usato dal modulo Geo sullo stesso database fisico. */
+    protected $table = 'warehouse_locations';
+
     /** @var list<string> */
     protected $fillable = [
         'area_id',
