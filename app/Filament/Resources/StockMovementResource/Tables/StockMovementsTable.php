@@ -46,8 +46,9 @@ class StockMovementsTable extends XotBaseResourceTable
         return [
             'type' => SelectFilter::make('type')->options(MovementTypeEnum::class)->multiple(),
             'stock_unit_id' => SelectFilter::make('stock_unit_id')->relationship('stockUnit', 'code')->searchable(),
+            // form(): da Filament 5.11.2 (la versione che la CI installa) schema() sui filtri e' deprecato.
             'occurred_at' => Filter::make('occurred_at')
-                ->schema([
+                ->form([
                     DatePicker::make('occurred_from'),
                     DatePicker::make('occurred_until'),
                 ])

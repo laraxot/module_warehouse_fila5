@@ -14,6 +14,8 @@ use Illuminate\Support\Carbon;
 use Modules\Warehouse\Enums\AreaTypeEnum;
 use Modules\Warehouse\Exceptions\InvalidAreaColorException;
 
+use function Safe\preg_match;
+
 /**
  * Area del magazzino (zona autorizzata con capienza e poligono sulla planimetria).
  *

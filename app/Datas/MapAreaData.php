@@ -7,6 +7,8 @@ namespace Modules\Warehouse\Datas;
 use Modules\Warehouse\Enums\AreaTypeEnum;
 use Spatie\LaravelData\Data;
 
+use function Safe\preg_match;
+
 /**
  * Un'area pronta per la mappa SVG: coordinate già in unità SVG (1 = 1 metro).
  */
