@@ -8,10 +8,12 @@ use Modules\User\Models\Policies\UserBasePolicy;
 use Modules\Warehouse\Models\Location;
 use Modules\Xot\Contracts\UserContract;
 use Modules\Xot\Models\Policies\Concerns\DeniesUndeclaredFilamentAbilities;
+use Modules\Xot\Models\Policies\Concerns\RequiresOperationalPermissions;
 
 class LocationPolicy extends UserBasePolicy
 {
     use DeniesUndeclaredFilamentAbilities;
+    use RequiresOperationalPermissions;
 
     public function viewAny(UserContract $user): bool
     {
