@@ -182,3 +182,10 @@ verifica dei movimenti, immutabilità del registro, guard registrato da config, 
 e portata (`PlacementLockingTest`).
 
 Storie: [`docs/stories/`](stories/).
+
+## Migrazioni
+
+Le migrazioni di `stock_units`, `stock_movements` hanno un `down()` che rifiuta il rollback: sono dati legali o di tracciabilità e non si
+cancellano con `migrate:rollback` (audit database R15). Unique e soft delete: decisioni nella story
+[`legal-tables-migrations`](../../Waste/docs/stories/legal-tables-migrations.story.md) del modulo Waste.
+
