@@ -11,9 +11,9 @@ Dipendenze: `Xot`, `Labeling` (identificatori QR/RFID e stampa etichette). Conne
 
 | Modello | Tabella | Note |
 |---|---|---|
-| `Warehouse` | `warehouses` | `code` univoco, `map_width_m`/`map_height_m`, media collection `map` (planimetria, file singolo) |
-| `Area` | `areas` | `type` (`AreaTypeEnum`), `max_weight_kg` (null = illimitata), `map_geometry` `[[x,y],...]` in metri, unique `(warehouse_id, code)` |
-| `Location` | `locations` | `code` univoco nel magazzino (`{area}-{codice}`, garantito dal modello), `x`/`y` in metri, `max_weight_kg`; implementa `LabelableContract` (codice etichetta `LOC-{magazzino}-{codice}`) |
+| `Warehouse` | `warehouses` | `code` univoco, `map_width_m`/`map_height_m`, media collection `map` (planimetria, file singolo, solo PNG/JPEG/WebP: niente SVG, che può contenere script) |
+| `Area` | `areas` | `type` (`AreaTypeEnum`), `max_weight_kg` (null = illimitata), `map_geometry` `[[x,y],...]` in metri, `color` solo `#rrggbb` (validato nel form e nel modello: finisce nell'attributo `style` della mappa), unique `(warehouse_id, code)` |
+| `Location` | `warehouse_locations` | `code` univoco nel magazzino (`{area}-{codice}`, garantito dal modello), `x`/`y` in metri, `max_weight_kg`; implementa `LabelableContract` (codice etichetta `LOC-{magazzino}-{codice}`) |
 | `StockUnit` | `stock_units` | `code` `SU-{anno}-{6 cifre}`, `status` (`StockUnitStatusEnum`), `container_type`, `net_weight_kg`, `tare_weight_kg`, morph `subject`; implementa `LabelableContract` (codice etichetta = `code`) |
 | `StockMovement` | `stock_movements` | registro solo-insert: update/delete lanciano `ImmutableStockMovementException`; morph `reference` |
 
@@ -89,6 +89,13 @@ annullo, consumo, uscita) prendono solo l'ultimo anello, quindi non si creano ci
 modulo che blocca righe proprie lo fa dentro `deny()`, cioè **dopo** i lock di Warehouse.
 `CheckPlacementAction` chiamata da sola (fuori da `PutAwayStockUnitAction`) non blocca nulla: serve a
 mostrare in anticipo il motivo di un rifiuto, ma l'esito vincolante è quello dentro la transazione.
+
+### Carichi nelle liste (niente query per riga)
+
+`Area::withLoadKg()` e `Location::withLoadKg()` aggiungono la colonna `load_kg` alla query; le action di carico
+la usano se presente. Tabelle e relation manager di aree e posizioni, `AreaOccupancyWidget` e la mappa
+eseguono un numero fisso di query (audit database R13). Indice `stock_units (warehouse_id, status, location_id)`
+(migrazione `2026_11_06_100500_add_query_supporting_indexes`, `ensureIndexes()`).
 
 ### Stati
 
@@ -175,3 +182,25 @@ verifica dei movimenti, immutabilità del registro, guard registrato da config, 
 e portata (`PlacementLockingTest`).
 
 Storie: [`docs/stories/`](stories/).
+
+## Migrazioni
+
+Le migrazioni di `stock_units`, `stock_movements` hanno un `down()` che rifiuta il rollback: sono dati legali o di tracciabilità e non si
+cancellano con `migrate:rollback` (audit database R15). Unique e soft delete: decisioni nella story
+[`legal-tables-migrations`](../../Waste/docs/stories/legal-tables-migrations.story.md) del modulo Waste.
+
+## Permessi
+
+Policy in `app/Models/Policies`, tutte con `DeniesUndeclaredFilamentAbilities` (eliminazione massiva, ripristino,
+riordino, collegamenti negati se non dichiarati). Permessi creati da `WarehousePermissionSeeder` (idempotente,
+guard `web`, chiamato da `WarehouseDatabaseSeeder`).
+
+| Bottone / pagina | Abilità | Permesso |
+|---|---|---|
+| Stocca/sposta unità | `move` | `stock_unit.move` |
+| Rettifica peso | `adjustWeight` | `stock_unit.adjustWeight` |
+| Annulla unità | `void` | `stock_unit.void` |
+| Mappa del magazzino (`canAccess`) | `viewAny` Warehouse | `warehouse.viewAny` |
+| Widget occupazione (`canView`) | `viewAny` Area | `area.viewAny` |
+
+I bottoni usano `->authorize()` e ricontrollano con `Gate::authorize()` nella callback.

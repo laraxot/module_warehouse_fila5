@@ -75,7 +75,7 @@
                         <polygon
                             class="wh-map-area {{ $isSelected ? 'is-selected' : '' }}"
                             points="{{ $area->svgPoints() }}"
-                            style="fill: {{ $fill($level) }}; stroke: {{ $area->color ?? $fill($level) }};"
+                            style="fill: {{ $fill($level) }}; stroke: {{ $area->strokeColor($fill($level)) }};"
                             wire:click="selectArea({{ $area->id }})"
                             tabindex="0"
                             role="button"

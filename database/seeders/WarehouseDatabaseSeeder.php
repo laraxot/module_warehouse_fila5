@@ -14,6 +14,7 @@ class WarehouseDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            WarehousePermissionSeeder::class,
             WarehouseSeeder::class,
             StockUnitSeeder::class,
         ]);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Warehouse\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,6 +42,12 @@ class Location extends BaseModel implements LabelableContract
 
     public const string LABEL_PREFIX = 'LOC';
 
+    /** Colonna aggiunta da `withLoadKg()`. */
+    public const string LOAD_KG_ATTRIBUTE = 'load_kg';
+
+    /** Non `locations`: nome già usato dal modulo Geo sullo stesso database fisico. */
+    protected $table = 'warehouse_locations';
+
     /** @var list<string> */
     protected $fillable = [
         'area_id',
@@ -66,6 +73,45 @@ class Location extends BaseModel implements LabelableContract
     public function stockUnits(): HasMany
     {
         return $this->hasMany(StockUnit::class);
+    }
+
+    /**
+     * Aggiunge alla query la colonna `load_kg` (somma delle unità che occupano la posizione) in un'unica
+     * query aggregata invece di una query per riga. GetLocationLoadKgAction lo usa se presente (audit database R13).
+     *
+     * @param  Builder<Location>  $query
+     */
+    public function scopeWithLoadKg(Builder $query): void
+    {
+        self::applyLoadKg($query);
+    }
+
+    /**
+     * Come lo scope `withLoadKg()`, per i builder non tipizzati (es. `modifyQueryUsing` delle tabelle Filament).
+     *
+     * @param  Builder<*>  $query
+     * @return Builder<*>
+     */
+    public static function applyLoadKg(Builder $query): Builder
+    {
+        $query->withSum([
+            'stockUnits as '.self::LOAD_KG_ATTRIBUTE => static function (Builder $units): void {
+                StockUnit::constrainToOccupying($units);
+            },
+        ], 'net_weight_kg');
+
+        return $query;
+    }
+
+    /** Carico precalcolato da `withLoadKg()`, null se la query non lo ha caricato. */
+    public function preloadedLoadKg(): ?float
+    {
+        $attributes = $this->getAttributes();
+        if (! \array_key_exists(self::LOAD_KG_ATTRIBUTE, $attributes)) {
+            return null;
+        }
+
+        return is_numeric($attributes[self::LOAD_KG_ATTRIBUTE]) ? round((float) $attributes[self::LOAD_KG_ATTRIBUTE], 3) : 0.0;
     }
 
     public function warehouseId(): int

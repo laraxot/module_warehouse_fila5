@@ -8,10 +8,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\Column;
+use Filament\Tables\Table;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Warehouse\Actions\GetAreaOccupancyAction;
 use Modules\Warehouse\Enums\AreaTypeEnum;
 use Modules\Warehouse\Models\Area;
@@ -19,6 +21,14 @@ use Modules\Xot\Filament\Resources\Tables\XotBaseResourceTable;
 
 class AreasTable extends XotBaseResourceTable
 {
+    /**
+     * Carico per riga in un'unica query (`withLoadKg()`) invece di una SUM per riga.
+     */
+    public function table(Table $table): Table
+    {
+        return parent::table($table)->modifyQueryUsing(static fn (Builder $query): Builder => Area::applyLoadKg($query));
+    }
+
     /**
      * @return array<string, Column>
      */

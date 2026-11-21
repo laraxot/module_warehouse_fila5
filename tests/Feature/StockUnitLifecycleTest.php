@@ -158,7 +158,7 @@ describe('putaway and transfer', function (): void {
         Assert::assertSame(StockUnitStatusEnum::STORED, $unit->status);
         Assert::assertSame([MovementTypeEnum::RECEIPT, MovementTypeEnum::PUTAWAY, MovementTypeEnum::TRANSFER], movementTypes($unit));
 
-        $transfer = $unit->movements()->orderByDesc('id')->firstOrFail();
+        $transfer = $unit->movements()->reorder()->orderByDesc('id')->firstOrFail();
         Assert::assertSame($a->id, $transfer->from_location_id);
         Assert::assertSame($b->id, $transfer->to_location_id);
         Assert::assertSame(600.0, (float) $transfer->weight_after_kg);

@@ -6,6 +6,7 @@ namespace Modules\Warehouse\Filament\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Number;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Reactive;
 use Modules\Warehouse\Actions\GetAreaOccupancyAction;
 use Modules\Warehouse\Models\Area;
@@ -14,6 +15,7 @@ use Modules\Xot\Filament\Widgets\XotBaseStatsOverviewWidget;
 /**
  * Occupazione delle aree attive: carico / portata e percentuale, colore per fascia.
  * Sulla mappa riceve il magazzino selezionato (`warehouseId`); in dashboard mostra tutte le aree.
+ * Una query sola per tutte le aree (`withLoadKg()`), anche con il polling.
  */
 class AreaOccupancyWidget extends XotBaseStatsOverviewWidget
 {
@@ -21,6 +23,12 @@ class AreaOccupancyWidget extends XotBaseStatsOverviewWidget
     public ?int $warehouseId = null;
 
     protected ?string $pollingInterval = '60s';
+
+    /** Solo chi può vedere le aree (permesso `area.viewAny`). */
+    public static function canView(): bool
+    {
+        return Gate::allows('viewAny', Area::class);
+    }
 
     protected function getHeading(): ?string
     {
@@ -34,7 +42,7 @@ class AreaOccupancyWidget extends XotBaseStatsOverviewWidget
     {
         $occupancy = app(GetAreaOccupancyAction::class);
 
-        $query = Area::query()->with('warehouse')->where('is_active', true);
+        $query = Area::query()->with('warehouse')->withLoadKg()->where('is_active', true);
         if ($this->warehouseId !== null) {
             $query->where('warehouse_id', $this->warehouseId);
         }

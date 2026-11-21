@@ -7,9 +7,14 @@ namespace Modules\Warehouse\Models\Policies;
 use Modules\User\Models\Policies\UserBasePolicy;
 use Modules\Warehouse\Models\Area;
 use Modules\Xot\Contracts\UserContract;
+use Modules\Xot\Models\Policies\Concerns\DeniesUndeclaredFilamentAbilities;
+use Modules\Xot\Models\Policies\Concerns\RequiresOperationalPermissions;
 
 class AreaPolicy extends UserBasePolicy
 {
+    use DeniesUndeclaredFilamentAbilities;
+    use RequiresOperationalPermissions;
+
     public function viewAny(UserContract $user): bool
     {
         return $user->hasPermissionTo('area.viewAny');

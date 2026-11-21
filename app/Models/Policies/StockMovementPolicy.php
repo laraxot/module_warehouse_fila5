@@ -7,6 +7,8 @@ namespace Modules\Warehouse\Models\Policies;
 use Modules\User\Models\Policies\UserBasePolicy;
 use Modules\Warehouse\Models\StockMovement;
 use Modules\Xot\Contracts\UserContract;
+use Modules\Xot\Models\Policies\Concerns\DeniesUndeclaredFilamentAbilities;
+use Modules\Xot\Models\Policies\Concerns\RequiresOperationalPermissions;
 
 /**
  * I movimenti sono un registro immutabile: si leggono e basta, anche per il super-admin.
@@ -14,6 +16,9 @@ use Modules\Xot\Contracts\UserContract;
  */
 class StockMovementPolicy extends UserBasePolicy
 {
+    use DeniesUndeclaredFilamentAbilities;
+    use RequiresOperationalPermissions;
+
     /** @var list<string> */
     private const array WRITE_ABILITIES = ['create', 'update', 'delete', 'deleteAny', 'restore', 'forceDelete', 'replicate', 'reorder'];
 

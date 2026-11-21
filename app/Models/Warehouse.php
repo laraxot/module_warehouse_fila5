@@ -36,6 +36,14 @@ class Warehouse extends BaseModel implements HasMedia
 
     public const string MAP_COLLECTION = 'map';
 
+    /**
+     * Formati ammessi per la planimetria: solo raster. Niente SVG: un SVG può contenere script ed è
+     * servito dallo stesso dominio dei pannelli (XSS memorizzato, audit sicurezza M5).
+     *
+     * @var list<string>
+     */
+    public const array MAP_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
     /** @var list<string> */
     protected $fillable = [
         'code',
@@ -50,7 +58,7 @@ class Warehouse extends BaseModel implements HasMedia
     {
         $this->addMediaCollection(self::MAP_COLLECTION)
             ->singleFile()
-            ->acceptsMimeTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
+            ->acceptsMimeTypes(self::MAP_MIME_TYPES);
     }
 
     /**

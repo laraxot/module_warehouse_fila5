@@ -23,6 +23,9 @@ return [
         'same_location' => 'Unit :code is already in location :location.',
         'code_already_used' => 'Location code :location is already used in this warehouse.',
     ],
+    'area' => [
+        'invalid_color' => 'Invalid colour ":color": use the hexadecimal format #rrggbb.',
+    ],
     'geometry' => [
         'invalid' => 'Invalid polygon: use a JSON list of [x,y] vertices in metres.',
         'too_few_vertices' => 'The polygon needs at least :min vertices.',

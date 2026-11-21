@@ -7,6 +7,8 @@ namespace Modules\Warehouse\Datas;
 use Modules\Warehouse\Enums\AreaTypeEnum;
 use Spatie\LaravelData\Data;
 
+use function Safe\preg_match;
+
 /**
  * Un'area pronta per la mappa SVG: coordinate già in unità SVG (1 = 1 metro).
  */
@@ -25,6 +27,15 @@ final class MapAreaData extends Data
         public readonly OccupancyData $occupancy,
         public readonly int $unitsCount,
     ) {}
+
+    /**
+     * Colore del bordo per l'attributo `style`: solo `#rrggbb`, altrimenti il fallback (colore di occupazione).
+     * Difesa anche per dati salvati prima della validazione del modello.
+     */
+    public function strokeColor(string $fallback): string
+    {
+        return $this->color !== null && preg_match('/^#[0-9a-fA-F]{6}$/', $this->color) === 1 ? $this->color : $fallback;
+    }
 
     /** Attributo `points` del <polygon> SVG. */
     public function svgPoints(): string

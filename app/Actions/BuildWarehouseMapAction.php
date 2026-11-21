@@ -18,6 +18,9 @@ use Spatie\QueueableAction\QueueableAction;
  * Prepara i dati della mappa di un magazzino: aree con poligono e occupazione, posizioni con
  * coordinate e carico, dimensioni della planimetria (da `map_width_m`/`map_height_m`, altrimenti
  * dal riquadro che contiene tutte le geometrie) e URL della planimetria di sfondo.
+ *
+ * Numero di query fisso, indipendente da aree e posizioni: i carichi delle aree sono la somma in memoria
+ * dei carichi delle loro posizioni (stessa regola di GetAreaLoadKgAction, posizioni eliminate comprese).
  */
 class BuildWarehouseMapAction
 {
@@ -30,7 +33,6 @@ class BuildWarehouseMapAction
     public const float MARGIN_M = 2.0;
 
     public function __construct(
-        private readonly GetAreaOccupancyAction $getAreaOccupancy,
         private readonly ParseMapGeometryAction $parseGeometry,
     ) {}
 
@@ -69,9 +71,12 @@ class BuildWarehouseMapAction
 
         /** @var array<int, int> $areaUnitCounts */
         $areaUnitCounts = [];
+        /** @var array<int, float> $areaLoads */
+        $areaLoads = [];
         $occupiedLocations = Location::withTrashed()->whereKey(array_keys($locationCounts))->get(['id', 'area_id']);
         foreach ($occupiedLocations as $occupied) {
             $areaUnitCounts[$occupied->area_id] = ($areaUnitCounts[$occupied->area_id] ?? 0) + ($locationCounts[$occupied->id] ?? 0);
+            $areaLoads[$occupied->area_id] = round(($areaLoads[$occupied->area_id] ?? 0.0) + ($locationLoads[$occupied->id] ?? 0.0), 3);
         }
 
         $mapAreas = [];
@@ -87,8 +92,8 @@ class BuildWarehouseMapAction
                 name: $area->name,
                 type: $area->type,
                 polygon: $polygon,
-                color: $area->color,
-                occupancy: $this->getAreaOccupancy->execute($area),
+                color: $area->safeColor(),
+                occupancy: new OccupancyData($areaLoads[$area->id] ?? 0.0, $area->maxWeightKg()),
                 unitsCount: $areaUnitCounts[$area->id] ?? 0,
             );
         }
